@@ -21,7 +21,6 @@ class DatasetProcessor:
     def __init__(self):
         self.data = self._get_labelled_dataframe()
         self._preprocess_text()
-        self.tf_idf_df = self._get_vectorised_representation()
 
     @staticmethod
     def _get_labelled_dataframe():
@@ -57,6 +56,6 @@ class DatasetProcessor:
         without_stop_words = [stemmer.stem(word) for word in word_tokens if word not in stop_words_set]
         return " ".join(without_stop_words)
 
-    def _get_vectorised_representation(self):
+    def get_vectorised_representation(self):
         tf_idf_vect = TfidfVectorizer(sublinear_tf=True, max_features=10000, smooth_idf=True)
-        return tf_idf_vect.fit_transform(self.data["text"])
+        return pd.DataFrame(tf_idf_vect.fit_transform(self.data["text"]).todense())
