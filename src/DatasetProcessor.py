@@ -1,19 +1,27 @@
+import re
 import string
 
-import nltk
-from sklearn.datasets import load_files
-from unidecode import unidecode
 import pandas as pd
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from nltk.stem.porter import PorterStemmer
-import re
+
+try:
+    from nltk.corpus import stopwords
+    from nltk.stem.porter import PorterStemmer
+    from nltk.tokenize import word_tokenize
+except:
+    import nltk
+    nltk.download('stopwords')
+    nltk.download('punkt')
+
+from sklearn.datasets import load_files
+from sklearn.feature_extraction.text import TfidfVectorizer
+from unidecode import unidecode
 
 
 class DatasetProcessor:
     def __init__(self):
         self.data = self._get_labelled_dataframe()
         self._preprocess_text()
+        self.tf_idf_df = self._get_vectorised_representation()
 
     @staticmethod
     def _get_labelled_dataframe():
@@ -37,21 +45,18 @@ class DatasetProcessor:
         self.data["text"] = self.data["text"].apply(lambda row: unidecode(row))
         # remove whitespaces
         self.data["text"] = self.data["text"].apply(lambda row: " ".join(row.split()))
-        # remove stopwords (NLTK stopword list) while tokenizing text
-        nltk.download('stopwords', quiet=True)
-        nltk.download('punkt', quiet=True)
-        stop_words = set(stopwords.words("english"))
-        self.data["text"] = self.data["text"].apply(lambda row: self._remove_stop_words(row, stop_words))
-        # conduct word stemming (using The Porter Stemming Algorithm)
+        # remove stopwords (NLTK stopword list) while text stemming (using The Porter Stemming Algorithm)
         stemmer = PorterStemmer()
-        self.data["text"] = self.data["text"].apply(lambda row: self._stem_word_tokens(row, stemmer))
+        stop_words = set(stopwords.words("english"))
+        self.data["text"] = self.data["text"].apply(lambda row: self._get_stems_without_stop_words(row, stop_words,
+                                                                                                   stemmer))
 
     @staticmethod
-    def _remove_stop_words(text: str, stop_words_set: set):
+    def _get_stems_without_stop_words(text: str, stop_words_set: set, stemmer):
         word_tokens = word_tokenize(text)
-        without_stop_words = [word for word in word_tokens if word not in stop_words_set]
-        return without_stop_words
+        without_stop_words = [stemmer.stem(word) for word in word_tokens if word not in stop_words_set]
+        return " ".join(without_stop_words)
 
-    @staticmethod
-    def _stem_word_tokens(tokens: list[str], stemmer):
-        return [stemmer.stem(word) for word in tokens]
+    def _get_vectorised_representation(self):
+        tf_idf_vect = TfidfVectorizer(sublinear_tf=True, max_features=10000, smooth_idf=True)
+        return tf_idf_vect.fit_transform(self.data["text"])
