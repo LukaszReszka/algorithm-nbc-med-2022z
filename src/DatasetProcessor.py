@@ -1,5 +1,6 @@
 import re
 import string
+import sys
 
 import pandas as pd
 
@@ -19,8 +20,12 @@ from unidecode import unidecode
 
 class DatasetProcessor:
     def __init__(self):
+        sys.stderr.write("Loading dataset from files ...\n")
         self.data = self._get_labelled_dataframe()
+        sys.stderr.write("Dataset loaded!\n")
+        sys.stderr.write("Preprocessing text ...\n")
         self._preprocess_text()
+        sys.stderr.write("Text preprocessed!\n")
 
     @staticmethod
     def _get_labelled_dataframe():
@@ -57,5 +62,8 @@ class DatasetProcessor:
         return " ".join(without_stop_words)
 
     def get_vectorised_representation(self):
+        sys.stderr.write("Vectorizing text ...\n")
         tf_idf_vect = TfidfVectorizer(sublinear_tf=True, max_features=10000, smooth_idf=True)
-        return pd.DataFrame(tf_idf_vect.fit_transform(self.data["text"]).todense())
+        df = pd.DataFrame(tf_idf_vect.fit_transform(self.data["text"]).todense())
+        sys.stderr.write("Text vectorized!\n")
+        return df
