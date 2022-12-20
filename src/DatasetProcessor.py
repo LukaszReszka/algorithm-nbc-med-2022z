@@ -13,8 +13,8 @@ except:
     nltk.download('stopwords')
     nltk.download('punkt')
 
-from sklearn.decomposition import PCA
 from sklearn.datasets import load_files
+from sklearn.decomposition import PCA
 from sklearn.feature_extraction.text import TfidfVectorizer
 from unidecode import unidecode
 
