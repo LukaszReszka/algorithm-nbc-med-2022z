@@ -13,6 +13,7 @@ except:
     nltk.download('stopwords')
     nltk.download('punkt')
 
+from sklearn.decomposition import PCA
 from sklearn.datasets import load_files
 from sklearn.feature_extraction.text import TfidfVectorizer
 from unidecode import unidecode
@@ -22,10 +23,22 @@ class DatasetProcessor:
     def __init__(self):
         sys.stderr.write("Loading dataset from files ... ")
         self.data = self._get_labelled_dataframe()
-        sys.stderr.write("Dataset loaded!\n")
-        sys.stderr.write("Preprocessing text ... ")
+        sys.stderr.write("Done!\nPreprocessing text ... ")
         self._preprocess_text()
-        sys.stderr.write("Text preprocessed!\n")
+        sys.stderr.write("Done!\n")
+        self._tf_idf_mtx = None
+
+    def get_tf_idf_rep(self):
+        sys.stderr.write("Vectorizing text ... ")
+        tf_idf_vect = TfidfVectorizer(max_features=10000)
+        self._tf_idf_mtx = tf_idf_vect.fit_transform(self.data["text"])
+        df = pd.DataFrame(self._tf_idf_mtx.todense())
+        sys.stderr.write("Done!\n")
+        return df
+
+    def get_pca_rep(self):
+        pca_algorithm = PCA(n_components=2, random_state=23)
+        return pca_algorithm.fit_transform(self._tf_idf_mtx.toarray())
 
     @staticmethod
     def _get_labelled_dataframe():
@@ -60,10 +73,3 @@ class DatasetProcessor:
         word_tokens = word_tokenize(text)
         without_stop_words = [stemmer.stem(word) for word in word_tokens if word not in stop_words_set]
         return " ".join(without_stop_words)
-
-    def get_tf_idf_rep(self):
-        sys.stderr.write("Vectorizing text ... ")
-        tf_idf_vect = TfidfVectorizer(sublinear_tf=True, max_features=10000, smooth_idf=True)
-        df = pd.DataFrame(tf_idf_vect.fit_transform(self.data["text"]).todense())
-        sys.stderr.write("Text vectorized!\n")
-        return df
