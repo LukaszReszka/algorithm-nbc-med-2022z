@@ -20,10 +20,10 @@ from unidecode import unidecode
 
 class DatasetProcessor:
     def __init__(self):
-        sys.stderr.write("Loading dataset from files ...\n")
+        sys.stderr.write("Loading dataset from files ... ")
         self.data = self._get_labelled_dataframe()
         sys.stderr.write("Dataset loaded!\n")
-        sys.stderr.write("Preprocessing text ...\n")
+        sys.stderr.write("Preprocessing text ... ")
         self._preprocess_text()
         sys.stderr.write("Text preprocessed!\n")
 
@@ -61,8 +61,8 @@ class DatasetProcessor:
         without_stop_words = [stemmer.stem(word) for word in word_tokens if word not in stop_words_set]
         return " ".join(without_stop_words)
 
-    def get_vectorised_representation(self):
-        sys.stderr.write("Vectorizing text ...\n")
+    def get_tf_idf_rep(self):
+        sys.stderr.write("Vectorizing text ... ")
         tf_idf_vect = TfidfVectorizer(sublinear_tf=True, max_features=10000, smooth_idf=True)
         df = pd.DataFrame(tf_idf_vect.fit_transform(self.data["text"]).todense())
         sys.stderr.write("Text vectorized!\n")
