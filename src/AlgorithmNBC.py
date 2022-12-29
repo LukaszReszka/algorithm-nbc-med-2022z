@@ -7,8 +7,8 @@ class AlgorithmNBC:
     def __init__(self):
         self.clusters_id = None
 
-    def run(self, tf_idf_df, k: int):
-        neighborhood = NeighborsIndicator(tf_idf_df, k)
+    def run(self, vect_rep_df, k: int):
+        neighborhood = NeighborsIndicator(vect_rep_df, k)
         self.clusters_id = [-1] * neighborhood.tf_idf_df.shape[0]
         current_gr_id = 0
 

@@ -3,8 +3,8 @@ from tqdm import trange
 
 
 class NeighborsIndicator:
-    def __init__(self, vectorised_sparse_matrix, k: int):
-        self.tf_idf_df = vectorised_sparse_matrix
+    def __init__(self, vectorised_matrix, k: int):
+        self.tf_idf_df = vectorised_matrix
         self._knn, self._rknn_numb = dict(), dict()
         self._get_nearest_neighbors(k)
         self._ndf = self._calculate_ndf()

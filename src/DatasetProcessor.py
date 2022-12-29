@@ -10,6 +10,7 @@ try:
     from nltk.tokenize import word_tokenize
 except:
     import nltk
+
     nltk.download('stopwords')
     nltk.download('punkt')
 
@@ -17,6 +18,8 @@ from sklearn.datasets import load_files
 from sklearn.decomposition import PCA
 from sklearn.feature_extraction.text import TfidfVectorizer
 from unidecode import unidecode
+import torch
+import torchtext
 
 
 class DatasetProcessor:
@@ -26,19 +29,28 @@ class DatasetProcessor:
         sys.stderr.write("Done!\nPreprocessing text ... ")
         self._preprocess_text()
         sys.stderr.write("Done!\n")
-        self._tf_idf_mtx = None
+        self._vect_mtx = None
 
     def get_tf_idf_rep(self):
         sys.stderr.write("Vectorizing text ... ")
         tf_idf_vect = TfidfVectorizer(max_features=10000)
-        self._tf_idf_mtx = tf_idf_vect.fit_transform(self.data["text"])
-        df = pd.DataFrame(self._tf_idf_mtx.todense())
+        self._vect_mtx = tf_idf_vect.fit_transform(self.data["text"])
+        df = pd.DataFrame(self._vect_mtx.todense())
+        sys.stderr.write("Done!\n")
+        return df
+
+    def get_glove_rep(self):
+        sys.stderr.write("Vectorizing text ... ")
+        glove = torchtext.vocab.GloVe(name="6B",  # trained on Wikipedia 2014 corpus of 6 billion words
+                                      dim=50)
+        print(glove["dog"])
+        df = pd.DataFrame()
         sys.stderr.write("Done!\n")
         return df
 
     def get_pca_rep(self):
         pca_algorithm = PCA(n_components=2, random_state=23)
-        return pca_algorithm.fit_transform(self._tf_idf_mtx.toarray())
+        return pca_algorithm.fit_transform(self._vect_mtx.toarray())
 
     @staticmethod
     def _get_labelled_dataframe():
