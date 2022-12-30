@@ -14,12 +14,12 @@ except:
     nltk.download('stopwords')
     nltk.download('punkt')
 
+import numpy as np
+import torchtext
 from sklearn.datasets import load_files
 from sklearn.decomposition import PCA
 from sklearn.feature_extraction.text import TfidfVectorizer
 from unidecode import unidecode
-import torch
-import torchtext
 
 
 class DatasetProcessor:
@@ -29,28 +29,35 @@ class DatasetProcessor:
         sys.stderr.write("Done!\nPreprocessing text ... ")
         self._preprocess_text()
         sys.stderr.write("Done!\n")
-        self._vect_mtx = None
+        self._vect_df = None
 
-    def get_tf_idf_rep(self):
-        sys.stderr.write("Vectorizing text ... ")
-        tf_idf_vect = TfidfVectorizer(max_features=10000)
-        self._vect_mtx = tf_idf_vect.fit_transform(self.data["text"])
-        df = pd.DataFrame(self._vect_mtx.todense())
+    def get_tf_idf_rep(self, max_f=10000):
+        sys.stderr.write("Vectorizing text - TF-IDF ... ")
+        tf_idf_vect = TfidfVectorizer(max_features=max_f)
+        self._vect_df = tf_idf_vect.fit_transform(self.data["text"])
+        self._vect_df = pd.DataFrame(self._vect_df.todense())
         sys.stderr.write("Done!\n")
-        return df
+        return self._vect_df
 
-    def get_glove_rep(self):
-        sys.stderr.write("Vectorizing text ... ")
+    def get_glove_rep(self, dimension=100):
+        sys.stderr.write("Vectorizing text - GloVe ... ")
         glove = torchtext.vocab.GloVe(name="6B",  # trained on Wikipedia 2014 corpus of 6 billion words
-                                      dim=50)
-        print(glove["dog"])
-        df = pd.DataFrame()
+                                      dim=dimension, cache="../data/glove/")
+
+        self._vect_df = pd.DataFrame(columns=[ind for ind in range(dimension)])
+        for i in range(self.data.shape[0]):
+            doc_vect_rep = [0.0] * dimension
+            for word in self.data.loc[i, "text"].split():
+                summing_array = np.array([doc_vect_rep, glove[word].tolist()])
+                doc_vect_rep = np.sum(summing_array, 0).tolist()
+            self._vect_df.loc[i] = np.divide(doc_vect_rep, len(self.data.loc[i, "text"].split())).tolist()
+
         sys.stderr.write("Done!\n")
-        return df
+        return self._vect_df
 
     def get_pca_rep(self):
         pca_algorithm = PCA(n_components=2, random_state=23)
-        return pca_algorithm.fit_transform(self._vect_mtx.toarray())
+        return pca_algorithm.fit_transform(self._vect_df)
 
     @staticmethod
     def _get_labelled_dataframe():
