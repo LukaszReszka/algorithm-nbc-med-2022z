@@ -18,6 +18,12 @@ class ResultsVisualiser:
 
         sys.stderr.write("Done - saved to 'visuals' folder!")
 
+    def visualise_test_dataset(self, coordinates, clusters_id, algo_gr_ids, test_num):
+        sys.stderr.write("Visualising test " + str(test_num) + " dataset results ... ")
+        self._visualise_clusters("Zbiór testowy " + str(test_num) + " - klastry referencyjne", clusters_id, coordinates)
+        self._visualise_clusters("Zbiór testowy " + str(test_num) + " - klastry NBC", algo_gr_ids, coordinates)
+        sys.stderr.write("Done - saved to 'visuals' folder!")
+
     @staticmethod
     def _visualise_clusters(plot_title: str, group_names: list, pca_rep):
         df_to_vis = pd.DataFrame({"X1": pca_rep[:, 0], "X2": pca_rep[:, 1], "Grupa": group_names})
