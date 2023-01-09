@@ -9,20 +9,26 @@ class ResultsVisualiser:
     def __init__(self, data):
         self.data = data
 
-    def visualise_results(self, pca_rep, clusters_ids, vect_type: str):
-        sys.stderr.write("Visualising results ... ")
+    def visualise_nbc_results(self, pca_rep, nbc_ids, vect_type: str):
+        sys.stderr.write("Visualising NBC results ... ")
         self._visualise_clusters("Klastry referencyjne (" + vect_type + ")", self.data["group_name"],
                                  pca_rep)
-        self._visualise_clusters("Klastry wyznaczone przez NBC (" + vect_type + ")", clusters_ids,
+        self._visualise_clusters("Klastry wyznaczone przez NBC (" + vect_type + ")", nbc_ids,
                                  pca_rep)
 
-        sys.stderr.write("Done - saved to 'visuals' folder!")
+        sys.stderr.write("Done - saved to 'visuals' folder!\n")
 
     def visualise_test_dataset(self, coordinates, clusters_id, algo_gr_ids, test_num):
         sys.stderr.write("Visualising test " + str(test_num) + " dataset results ... ")
         self._visualise_clusters("Zbiór testowy " + str(test_num) + " - klastry referencyjne", clusters_id, coordinates)
         self._visualise_clusters("Zbiór testowy " + str(test_num) + " - klastry NBC", algo_gr_ids, coordinates)
-        sys.stderr.write("Done - saved to 'visuals' folder!")
+        sys.stderr.write("Done - saved to 'visuals' folder!\n")
+
+    def visualise_alg_results(self, pca_rep, clusters_ids, alg_name: str, vect_type: str):
+        sys.stderr.write("Visualising " + alg_name + " results ... ")
+        self._visualise_clusters("Klastry wyznaczone przez " + alg_name + " (" + vect_type + ")", clusters_ids,
+                                 pca_rep)
+        sys.stderr.write("Done - saved to 'visuals' folder!\n")
 
     @staticmethod
     def _visualise_clusters(plot_title: str, group_names: list, pca_rep):

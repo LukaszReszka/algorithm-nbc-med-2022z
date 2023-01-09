@@ -30,34 +30,43 @@ class DatasetProcessor:
         self._preprocess_text()
         sys.stderr.write("Done!\n")
         self._vect_df = None
+        self._pca_rep = None
+        self._used_vect = ""
 
     def get_tf_idf_rep(self, max_f=10000):
-        sys.stderr.write("Vectorizing text - TF-IDF ... ")
-        tf_idf_vect = TfidfVectorizer(max_features=max_f)
-        self._vect_df = tf_idf_vect.fit_transform(self.data["text"])
-        self._vect_df = pd.DataFrame(self._vect_df.todense())
-        sys.stderr.write("Done!\n")
+        if self._used_vect != "tf-idf":
+            self._pca_rep = None
+            self._used_vect = "tf-idf"
+            sys.stderr.write("Vectorizing text - TF-IDF ... ")
+            tf_idf_vect = TfidfVectorizer(max_features=max_f)
+            self._vect_df = tf_idf_vect.fit_transform(self.data["text"])
+            self._vect_df = pd.DataFrame(self._vect_df.todense())
+            sys.stderr.write("Done!\n")
         return self._vect_df
 
     def get_glove_rep(self, dimension=100):
-        sys.stderr.write("Vectorizing text - GloVe ... ")
-        glove = torchtext.vocab.GloVe(name="6B",  # trained on Wikipedia 2014 corpus of 6 billion words
-                                      dim=dimension, cache="../data/glove/")
+        if self._used_vect != "glove":
+            self._pca_rep = None
+            self._used_vect = "glove"
+            sys.stderr.write("Vectorizing text - GloVe ... ")
+            glove = torchtext.vocab.GloVe(name="6B",  # trained on Wikipedia 2014 corpus of 6 billion words
+                                          dim=dimension, cache="../data/glove/")
 
-        self._vect_df = pd.DataFrame(columns=[ind for ind in range(dimension)])
-        for i in range(self.data.shape[0]):
-            doc_vect_rep = [0.0] * dimension
-            for word in self.data.loc[i, "text"].split():
-                summing_array = np.array([doc_vect_rep, glove[word].tolist()])
-                doc_vect_rep = np.sum(summing_array, 0).tolist()
-            self._vect_df.loc[i] = np.divide(doc_vect_rep, len(self.data.loc[i, "text"].split())).tolist()
-
-        sys.stderr.write("Done!\n")
+            self._vect_df = pd.DataFrame(columns=[ind for ind in range(dimension)])
+            for i in range(self.data.shape[0]):
+                doc_vect_rep = [0.0] * dimension
+                for word in self.data.loc[i, "text"].split():
+                    summing_array = np.array([doc_vect_rep, glove[word].tolist()])
+                    doc_vect_rep = np.sum(summing_array, 0).tolist()
+                self._vect_df.loc[i] = np.divide(doc_vect_rep, len(self.data.loc[i, "text"].split())).tolist()
+            sys.stderr.write("Done!\n")
         return self._vect_df
 
     def get_pca_rep(self):
-        pca_algorithm = PCA(n_components=2, random_state=23)
-        return pca_algorithm.fit_transform(self._vect_df)
+        if self._pca_rep is None:
+            pca_algorithm = PCA(n_components=2, random_state=23)
+            self._pca_rep = pca_algorithm.fit_transform(self._vect_df)
+        return self._pca_rep
 
     @staticmethod
     def _get_labelled_dataframe():
