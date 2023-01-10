@@ -6,7 +6,7 @@ przeprowadzonego przez następujące algorytmy:
 **własna implementacja**,
 - algorytm **k-średnich** (**k-means**),
 - algorytm grupowania hierarchicznego (**Aglomerative Clustering**),
-- algorytm propagacji powinowactwa (**Affinity Propagation**).
+- algorytm **OPTICS**.
 
 
 _Autor: Łukasz Reszka (300257)_
