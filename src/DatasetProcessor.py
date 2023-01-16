@@ -68,6 +68,9 @@ class DatasetProcessor:
             self._pca_rep = pca_algorithm.fit_transform(self._vect_df)
         return self._pca_rep
 
+    def get_coordinates(self):
+        return self._vect_df
+
     @staticmethod
     def _get_labelled_dataframe():
         labelled_dataset = load_files("../data/bbc-dataset/", encoding="utf-8")
