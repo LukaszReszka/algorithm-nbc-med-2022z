@@ -3,23 +3,23 @@ import string
 import sys
 
 import pandas as pd
-
-try:
-    from nltk.corpus import stopwords
-    from nltk.stem.porter import PorterStemmer
-    from nltk.tokenize import word_tokenize
-except:
-    import nltk
-
-    nltk.download('stopwords')
-    nltk.download('punkt')
-
 import numpy as np
 import torchtext
 from sklearn.datasets import load_files
 from sklearn.decomposition import PCA
 from sklearn.feature_extraction.text import TfidfVectorizer
 from unidecode import unidecode
+
+from nltk.corpus import stopwords
+from nltk.stem.porter import PorterStemmer
+from nltk.tokenize import word_tokenize
+
+import nltk
+
+nltk.download('stopwords')
+nltk.download('punkt')
+
+
 
 
 class DatasetProcessor:
